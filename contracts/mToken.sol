@@ -6,6 +6,11 @@ contract MToken is ERC721("mToken","MTK"){
     mapping(uint256=>mapping(string=>uint256)) public tokenData;
     uint256 count;
 
+    modifier isWithdrawValid(uint256 id){
+        require(block.timestamp>=(tokenData[id]["duration"]+tokenData[id]["startTime"]),"time deposit not yet mature");
+        _;
+    }
+
     function mint(address to, uint256 volumn, uint256 rate, uint256 duration)public{
         _safeMint(to, count);
         tokenData[count]["volumn"] = volumn;
@@ -15,12 +20,12 @@ contract MToken is ERC721("mToken","MTK"){
         count++;
     }
 
-    function burn(uint256 id)public returns(uint256 volumn, uint256 rate, uint256 duration){
-        require(block.timestamp>=tokenData[count]["duration"]+tokenData[count]["startTime"],"time deposit not yet mature");
+    function burn(uint256 id)public isWithdrawValid(id) returns(uint256 volumn, uint256 rate, uint256 duration){
         _burn(id);
-        volumn = tokenData[count]["volumn"];
-        rate = tokenData[count]["rate"];
-        duration = tokenData[count]["duration"];
+        volumn = tokenData[id]["volumn"];
+        rate = tokenData[id]["rate"];
+        duration = tokenData[id]["duration"];
     }
+
 }
 

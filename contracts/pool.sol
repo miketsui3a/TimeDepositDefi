@@ -7,7 +7,7 @@ contract Pool {
 
     address public underlyingAssetAddress;
     address public mTokenAddress;
-    uint256 totalAsset;
+    uint256 public totalAsset;
 
     constructor(address _underlyingAssetAddress, address _mTokenAddress){
         underlyingAssetAddress = _underlyingAssetAddress;
@@ -27,6 +27,6 @@ contract Pool {
         (uint256 volumn, uint256 rate, uint256 duration) = MToken(_mTokenAddress).burn(id);
 
         require(ERC20(underlyingAssetAddress).transfer(msg.sender, volumn),"Withdraw failed");
-
+        totalAsset -= volumn;
     }
 }
