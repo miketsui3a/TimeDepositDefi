@@ -23,7 +23,7 @@ describe("Greeter", async function () {
     const TestToken = await ethers.getContractFactory("TestToken");
     const testToken = await TestToken.deploy();
     await testToken.deployed();
-    const mintTx = await testToken.mint(user, 100000000000000);
+    const mintTx = await testToken.mint(user, 1000000000000000);
     const mintReceipt = await mintTx.wait();
 
     console.log("balance: ", await testToken.balanceOf(user));
@@ -44,16 +44,31 @@ describe("Greeter", async function () {
     const depositTeceipt = await depositTx.wait();
     console.log("deposit receipt status: ", depositTeceipt.status);
 
-    const withdrawApproveTx = await mtoken.approve(pool.address, 0);
-    const withdrawApproveReceipt = await withdrawApproveTx.wait()
-    console.log("withdrawApproveStatus: ",withdrawApproveReceipt.status)
+    // const withdrawApproveTx = await mtoken.approve(pool.address, 0);
+    // const withdrawApproveReceipt = await withdrawApproveTx.wait()
+    // console.log("withdrawApproveStatus: ",withdrawApproveReceipt.status)
 
-    await sleep(10000)
+    // await sleep(10000)
 
-    const withdrawTx = await pool.withdraw(0);
-    const withdrawReceipt = await withdrawTx.wait();
-    console.log("withdraw status: ", withdrawReceipt.status);
+    // const withdrawTx = await pool.withdraw(0);
+    // const withdrawReceipt = await withdrawTx.wait();
+    // console.log("withdraw status: ", withdrawReceipt.status);
 
     console.log(await pool.totalAsset());
+
+
+    // const Borrower = await ethers.getContractFactory("Borrower");
+    // const borrower = await Borrower.deploy()
+    // await borrower.deployed()
+
+    // const borrowTx = await borrower.borrow(pool.address, 100000000000)
+    // const borrowTxTeceipt = await borrowTx.wait()
+    // console.log(borrowTxTeceipt.status)
+
+    const hex = (await pool.getFlashLoanFee(2300000000))._hex
+    console.log(hex)
+    console.log(parseInt(hex,16));
+
   });
+  
 });

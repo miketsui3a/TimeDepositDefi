@@ -1,13 +1,19 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./mToken.sol";
+import "./IBorrower.sol";
 
 contract Pool {
+
+    using SafeMath for uint256;
 
     address public underlyingAssetAddress;
     address public mTokenAddress;
     uint256 public totalAsset;
+
+    uint256 private flashLoanRateCap = 5;
 
     constructor(address _underlyingAssetAddress, address _mTokenAddress){
         underlyingAssetAddress = _underlyingAssetAddress;
@@ -28,5 +34,22 @@ contract Pool {
 
         require(ERC20(underlyingAssetAddress).transfer(msg.sender, volumn),"Withdraw failed");
         totalAsset -= volumn;
+    }
+
+    function flashLoan(uint256 amount)public {
+        require(amount<=totalAsset,"flash loan amount exceed total asset");
+        ERC20(underlyingAssetAddress).transfer(msg.sender, amount);
+
+        uint256 fee = amount.mul(flashLoanRateCap).div(100);
+        uint256 repayAmount = amount+fee;
+
+        IBorrower(msg.sender).flashLoanOperation(underlyingAssetAddress,repayAmount);
+
+        require(ERC20(underlyingAssetAddress).balanceOf(address(this))>=totalAsset+fee, "flash loan did not repay");
+        totalAsset += fee;
+    }
+
+    function getFlashLoanFee(uint256 amount)public view returns(uint256 fee){
+        fee = amount.mul(flashLoanRateCap).div(100);
     }
 }
